@@ -1,0 +1,6 @@
+.pio
+.vscode
+test
+lib/WiFiManager
+notes
+platformio.ini
