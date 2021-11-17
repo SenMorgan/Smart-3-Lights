@@ -26,14 +26,16 @@
 #define MQTT_AVAILABILITY_MESSAGE "online"
 #define MQTT_UPTIME_TOPIC         "uptime"
 #define MQTT_CMD_TOPIC            "set"
+#define MQTT_CMD_ON               "1"
+#define MQTT_CMD_OFF              "0"
 // Reconnecting to MQTT server delay
 #define RECONNECT_DELAY           30000
 // Delay between reporting states to MQTT server in idle mode (ms)
 #define PUBLISH_STEP              30000
 // IO pins
-#define LIGHT_1                   D1
-#define LIGHT_2                   D2
-#define LIGHT_3                   D3
 #define STATUS_LED                D4
+#define LIGHT_1                   D5
+#define LIGHT_2                   D6
+#define LIGHT_3                   D7
 
 #endif /* _DEF_H */
