@@ -32,6 +32,12 @@
 #define RECONNECT_DELAY           30000
 // Delay between reporting states to MQTT server in idle mode (ms)
 #define PUBLISH_STEP              30000
+// Run lights effect delay
+#define RUN_LIGHTS_STEP           60000L
+// Run lights effect interval between switching
+#define RUN_LIGHTS_INTERVAL       100
+// Run lights effect repeat times
+#define RUN_LIGHTS_CYCLES         2
 // IO pins
 #define STATUS_LED                D4
 #define LIGHT_1                   D5

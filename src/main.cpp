@@ -74,12 +74,22 @@ void setLights(uint8_t newState)
     params.mainState = newState;
     EEPROM.put(0, params);
     EEPROM.commit();
-    // Relay have negative active input
-    digitalWrite(LIGHT_1, !newState);
-    delay(500);
-    digitalWrite(LIGHT_2, !newState);
-    delay(500);
-    digitalWrite(LIGHT_3, !newState);
+    if (newState)
+    {
+        // Relay have negative active input
+        digitalWrite(LIGHT_1, 0);
+        delay(1000);
+        digitalWrite(LIGHT_2, 0);
+        delay(1000);
+        digitalWrite(LIGHT_3, 0);
+    }
+    else
+    {
+        digitalWrite(LIGHT_1, 1);
+        digitalWrite(LIGHT_2, 1);
+        digitalWrite(LIGHT_3, 1);
+        delay(1000);
+    }
     // For updating data immediately
     publishTimeStamp = 0;
 }
@@ -164,7 +174,7 @@ void saveConfigCallback(void)
  * @brief Clearing all saved values (WiFi, hostname, MQTT)
  * 
  */
-void clear_setting_memory(void)
+void clear_settings_memory(void)
 {
     for (int i = 0; i < 512; i++)
     {
@@ -174,6 +184,37 @@ void clear_setting_memory(void)
     delay(400);
     WiFiMan.resetSettings();
     delay(100);
+}
+
+void run_lights(uint8_t state, uint32_t ticks)
+{
+    static uint32_t timeStamp = 0;
+
+    if (state)
+    {
+        if (!timeStamp)
+            timeStamp = ticks;
+        else if (ticks > timeStamp + RUN_LIGHTS_STEP)
+        {
+            timeStamp = ticks;
+            for (int i = 0; i < RUN_LIGHTS_CYCLES; i++)
+            {
+                digitalWrite(LIGHT_1, 1);
+                delay(RUN_LIGHTS_INTERVAL);
+                digitalWrite(LIGHT_1, 0);
+                delay(RUN_LIGHTS_INTERVAL);
+                digitalWrite(LIGHT_2, 1);
+                delay(RUN_LIGHTS_INTERVAL);
+                digitalWrite(LIGHT_2, 0);
+                delay(RUN_LIGHTS_INTERVAL);
+                digitalWrite(LIGHT_3, 1);
+                delay(RUN_LIGHTS_INTERVAL);
+                digitalWrite(LIGHT_3, 0);
+            }
+        }
+    }
+    else if (timeStamp > 0)
+        timeStamp = 0;
 }
 
 void setup(void)
@@ -224,7 +265,7 @@ void setup(void)
     else if ((params.resetCounter - params.resetCounterComp) >= RESET_BUTTON_CYCLES)
     {
         Serial.println("Erasing WiFi and MQTT settings!");
-        clear_setting_memory();
+        clear_settings_memory();
         // blink buildin LED many times
         for (int i = 0; i < 50; i++)
         {
@@ -331,7 +372,7 @@ void setup(void)
 
     // Arduino OTA initializing
     ArduinoOTA.setHostname(params.hostname);
-    //ArduinoOTA.setPassword(params.otaPass);
+    ArduinoOTA.setPassword(params.otaPass);
     ArduinoOTA.begin();
     ArduinoOTA.onProgress([](uint16_t progress, uint16_t total)
                           { digitalWrite(STATUS_LED, !digitalRead(STATUS_LED)); });
@@ -366,5 +407,6 @@ void loop(void)
             reconnect();
         }
     }
+    run_lights(params.mainState, timeNow);
     yield();
 }
