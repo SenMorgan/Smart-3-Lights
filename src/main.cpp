@@ -65,11 +65,39 @@ char availabililtyTopic[128] = "";
 char uptimeTopic[128]        = "";
 
 /**
+ * @brief Initializing the Lights object
+ * 
+ * @param newState 
+ */
+void init_lights(uint8_t newState)
+{
+    params.mainState = newState;
+    EEPROM.put(0, params);
+    EEPROM.commit();
+    if (newState)
+    {
+        // Relay have negative active input
+        digitalWrite(LIGHT_1, 0);
+        delay(500);
+        digitalWrite(LIGHT_2, 0);
+        delay(500);
+        digitalWrite(LIGHT_3, 0);
+    }
+    else
+    {
+        digitalWrite(LIGHT_1, 1);
+        digitalWrite(LIGHT_2, 1);
+        digitalWrite(LIGHT_3, 1);
+        delay(1000);
+    }
+}
+
+/**
  * @brief Set the Lights object
  * 
  * @param newState 
  */
-void setLights(uint8_t newState)
+void set_lights(uint8_t newState)
 {
     params.mainState = newState;
     EEPROM.put(0, params);
@@ -86,12 +114,50 @@ void setLights(uint8_t newState)
     else
     {
         digitalWrite(LIGHT_1, 1);
-        digitalWrite(LIGHT_2, 1);
-        digitalWrite(LIGHT_3, 1);
         delay(1000);
+        digitalWrite(LIGHT_2, 1);
+        delay(1000);
+        digitalWrite(LIGHT_3, 1);
     }
     // For updating data immediately
     publishTimeStamp = 0;
+}
+
+/**
+ * @brief Running lights effect
+ * 
+ * @param state Lights actual state
+ * @param ticks Actul ticks
+ */
+void run_lights(uint8_t state, uint32_t ticks)
+{
+    static uint32_t timeStamp = 0;
+
+    if (state)
+    {
+        if (!timeStamp)
+            timeStamp = ticks;
+        else if (ticks > timeStamp + RUN_LIGHTS_STEP)
+        {
+            timeStamp = ticks;
+            for (int i = 0; i < RUN_LIGHTS_CYCLES; i++)
+            {
+                digitalWrite(LIGHT_1, 1);
+                delay(RUN_LIGHTS_INTERVAL);
+                digitalWrite(LIGHT_1, 0);
+                delay(RUN_LIGHTS_INTERVAL);
+                digitalWrite(LIGHT_2, 1);
+                delay(RUN_LIGHTS_INTERVAL);
+                digitalWrite(LIGHT_2, 0);
+                delay(RUN_LIGHTS_INTERVAL);
+                digitalWrite(LIGHT_3, 1);
+                delay(RUN_LIGHTS_INTERVAL);
+                digitalWrite(LIGHT_3, 0);
+            }
+        }
+    }
+    else if (timeStamp > 0)
+        timeStamp = 0;
 }
 
 /**
@@ -129,13 +195,13 @@ void callback(String topic, byte *payload, uint16_t length)
         if (msgString == MQTT_CMD_ON)
         {
             mqttClient.publish(publishTopic, MQTT_CMD_ON, true);
-            setLights(1);
+            set_lights(1);
             Serial.println("Received command ON");
         }
         else if (msgString == MQTT_CMD_OFF)
         {
             mqttClient.publish(publishTopic, MQTT_CMD_OFF, true);
-            setLights(0);
+            set_lights(0);
             Serial.println("Received command OFF");
         }
     }
@@ -186,37 +252,6 @@ void clear_settings_memory(void)
     delay(100);
 }
 
-void run_lights(uint8_t state, uint32_t ticks)
-{
-    static uint32_t timeStamp = 0;
-
-    if (state)
-    {
-        if (!timeStamp)
-            timeStamp = ticks;
-        else if (ticks > timeStamp + RUN_LIGHTS_STEP)
-        {
-            timeStamp = ticks;
-            for (int i = 0; i < RUN_LIGHTS_CYCLES; i++)
-            {
-                digitalWrite(LIGHT_1, 1);
-                delay(RUN_LIGHTS_INTERVAL);
-                digitalWrite(LIGHT_1, 0);
-                delay(RUN_LIGHTS_INTERVAL);
-                digitalWrite(LIGHT_2, 1);
-                delay(RUN_LIGHTS_INTERVAL);
-                digitalWrite(LIGHT_2, 0);
-                delay(RUN_LIGHTS_INTERVAL);
-                digitalWrite(LIGHT_3, 1);
-                delay(RUN_LIGHTS_INTERVAL);
-                digitalWrite(LIGHT_3, 0);
-            }
-        }
-    }
-    else if (timeStamp > 0)
-        timeStamp = 0;
-}
-
 void setup(void)
 {
     pinMode(STATUS_LED, OUTPUT);
@@ -239,7 +274,7 @@ void setup(void)
     EEPROM.commit();
 
     // Switch on / leave off lights depending on inverted saved value
-    setLights(!params.mainState);
+    init_lights(!params.mainState);
 
     // Some delay for the user to be able to call EEPROM erase command
     // by pressing reset button a few times
