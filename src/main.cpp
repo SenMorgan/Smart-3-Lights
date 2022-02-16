@@ -33,14 +33,6 @@ struct
     uint8_t  mainState    = 0;
 } params;
 
-// Headers to be appended with topics
-char willTopic[128]          = "";
-char subscribeTopic[128]     = "";
-char cmdTopic[128]           = "";
-char publishTopic[128]       = "";
-char availabililtyTopic[128] = "";
-char uptimeTopic[128]        = "";
-
 /**
  * @brief Initializing the Lights object
  *
@@ -143,9 +135,9 @@ void run_lights(uint8_t state, uint32_t ticks)
 uint8_t reconnect(void)
 {
     if (mqttClient.connect(HOSTNAME, MQTT_LOGIN, MQTT_PASSWORD,
-                           willTopic, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_MESSAGE))
+                           MQTT_WILL_TOPIC, MQTT_QOS, MQTT_RETAIN, MQTT_WILL_MESSAGE))
     {
-        mqttClient.subscribe(subscribeTopic);
+        mqttClient.subscribe(MQTT_SUBSCRIBE_TOPIC);
         Serial.println("Successfully connected to " MQTT_SERVER);
         return 1;
     }
@@ -163,17 +155,17 @@ void callback(String topic, byte *payload, uint16_t length)
         msgString += (char)payload[i];
 
     // Commands topic
-    if (topic == cmdTopic)
+    if (topic == MQTT_CMD_TOPIC)
     {
         if (msgString == MQTT_CMD_ON)
         {
-            mqttClient.publish(publishTopic, MQTT_CMD_ON, true);
+            mqttClient.publish(MQTT_PUBLISH_TOPIC, MQTT_CMD_ON, true);
             set_lights(1);
             Serial.println("Received command ON");
         }
         else if (msgString == MQTT_CMD_OFF)
         {
-            mqttClient.publish(publishTopic, MQTT_CMD_OFF, true);
+            mqttClient.publish(MQTT_PUBLISH_TOPIC, MQTT_CMD_OFF, true);
             set_lights(0);
             Serial.println("Received command OFF");
         }
@@ -188,11 +180,11 @@ void publish_data(void)
     static char buff[20];
 
     // Publish current lights state to server
-    mqttClient.publish(publishTopic, (params.mainState ? MQTT_CMD_ON : MQTT_CMD_OFF), true);
+    mqttClient.publish(MQTT_PUBLISH_TOPIC, (params.mainState ? MQTT_CMD_ON : MQTT_CMD_OFF), true);
 
-    mqttClient.publish(availabililtyTopic, MQTT_AVAILABILITY_MESSAGE);
+    mqttClient.publish(MQTT_AVAILABILITY_TOPIC, MQTT_AVAILABILITY_MESSAGE);
     sprintf(buff, "%ld sec", millis() / 1000);
-    mqttClient.publish(uptimeTopic, buff);
+    mqttClient.publish(MQTT_UPTIME_TOPIC, buff);
 
     Serial.println("Data was sended, time from start: " + String(buff));
 }
