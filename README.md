@@ -46,8 +46,6 @@ If you want to rebuild this project in VS Code with PlatformIO, you need to manu
 <br>
 
 ## Dependencies
-WiFiManager library v2.0.4-beta https://github.com/tzapu/WiFiManager
-
 MQTT library v2.8 https://github.com/knolleary/pubsubclient
 
 <br>
