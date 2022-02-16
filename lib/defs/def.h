@@ -1,19 +1,15 @@
-/**************************************************************
- *  def.h
+/**
+ * @file def.h
+ * @author SenMorgan https://github.com/SenMorgan
+ * @date 2021-11-16
  *
- *  Created on: 16 November 2021
- *  Author: SenMorgan https://github.com/SenMorgan
- *  
- ***************************************************************/
+ * @copyright Copyright (c) 2021 Sen Morgan
+ *
+ */
 
-#ifndef _DEF_H
-#define _DEF_H
+#ifndef _DEF_H_
+#define _DEF_H_
 
-#define DEFAULT_HOSTNAME          "Smart_3_Lights"
-// How many times should reset button be pressed to call setting erase
-#define RESET_BUTTON_CYCLES       3
-// Maximum delay between pressing reset button to call setting erase
-#define RESET_BUTTON_DELAY        500
 // MQTT definitions
 #define DEFAULT_TOPIC             "/smart-3-lights/"
 #define MQTT_WILL_TOPIC           "availability"
@@ -44,4 +40,4 @@
 #define LIGHT_2                   D6
 #define LIGHT_3                   D7
 
-#endif /* _DEF_H */
+#endif // _DEF_H_
