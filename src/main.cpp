@@ -232,6 +232,11 @@ void setup(void)
     if (reconnect())
         publish_data();
 
+    // Wi-Fi initializing
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWD);
+    WiFi.hostname(HOSTNAME);
+
     // Arduino OTA initializing
     ArduinoOTA.setHostname(OTA_HOSTNAME);
     ArduinoOTA.setPassword(OTA_PASSWORD);
