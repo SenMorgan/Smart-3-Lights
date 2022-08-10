@@ -13,7 +13,6 @@
  */
 
 #include <ArduinoOTA.h>
-#include <DNSServer.h>
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -21,7 +20,7 @@
 #include "credentials.h"
 #include "def.h"
 
-WiFiClient   espClient;
+WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 
 static uint32_t publishTimeStamp;
@@ -30,7 +29,7 @@ static uint32_t publishTimeStamp;
 struct
 {
     uint32_t resetCounter = 0;
-    uint8_t  mainState    = 0;
+    uint8_t mainState = 1;
 } params;
 
 /**
@@ -197,16 +196,23 @@ void setup(void)
     pinMode(LIGHT_3, OUTPUT);
 
     digitalWrite(STATUS_LED, 1);
-    digitalWrite(LIGHT_1, 1);
-    digitalWrite(LIGHT_2, 1);
-    digitalWrite(LIGHT_3, 1);
+    // digitalWrite(LIGHT_1, 1);
+    // digitalWrite(LIGHT_2, 1);
+    // digitalWrite(LIGHT_3, 1);
+
+    // Relay have negative active input
+    digitalWrite(LIGHT_1, 0);
+    delay(1000);
+    digitalWrite(LIGHT_2, 0);
+    delay(1000);
+    digitalWrite(LIGHT_3, 0);
 
     EEPROM.begin(16);
-    // Read data from EEPROM
+    //  Read data from EEPROM
     EEPROM.get(0, params);
 
     // Switch on / leave off lights depending on inverted saved value
-    init_lights(!params.mainState);
+    //init_lights(!params.mainState);
 
     // Increment reset counter and save it to EEPROM
     params.resetCounter++;
@@ -246,8 +252,8 @@ void loop(void)
 {
     ArduinoOTA.handle();
 
-    uint32_t timeNow           = millis();
-    uint8_t  connectedToServer = mqttClient.loop();
+    uint32_t timeNow = millis();
+    uint8_t connectedToServer = mqttClient.loop();
 
     // If it is time to publish data
     if (timeNow - publishTimeStamp > PUBLISH_STEP)
