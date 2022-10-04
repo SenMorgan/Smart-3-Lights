@@ -16,12 +16,6 @@ The project was created in PlatformIO 16.11.2021
 
 <br>
 
-## Wiring Schematic
-
-<img src="https://media3.giphy.com/media/TLeLKUdIc1tvAxb7ab/source.gif" width="400" height="250" />
-
-<br>
-
 ## Home Assistant YAML configuration
 ```yaml
 light:
